@@ -26,7 +26,6 @@ export class MoviesService {
 
   async deleteOne(id: string): Promise<Movie> {
     return await this.movieModel.findByIdAndRemove(id);
-    console.log('삭제완료');
   }
 
   async update(id: string, updateData: CreateMovieDto) {

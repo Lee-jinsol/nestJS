@@ -12,29 +12,26 @@ export class MoviesService {
   ) {}
 
   async create(movieData: CreateMovieDto): Promise<Movie> {
-    return new this.movieModel(movieData).save();
+    return await new this.movieModel(movieData).save();
   }
 
-  getAll(): Promise<Movie[]> {
-    return this.movieModel.find().exec(); //Real database 사용시 query가 오는 부분
+  async getAll(): Promise<Movie[]> {
+    return await this.movieModel.find().exec(); //Real database 사용시 query가 오는 부분
   }
 
   async getOne(id: string): Promise<Movie> {
-    // const movie = this.movieModel.find((movieModel) => movieModel.id);
-    // if (!movie) {
-    //   throw new NotFoundException(`Movie with id ${id} is not found`);
-    // }
-    console.log("get one service good");
-    return await this.movieModel.findOne({ id });
+    console.log('get one service good');
+    return await this.movieModel.findById(id);
   }
 
-  deleteOne(id: string) {
-    this.getOne(id);
-    return this.movieModel.remove(id);
+  async deleteOne(id: string): Promise<Movie> {
+    return await this.movieModel.findByIdAndRemove(id);
+    console.log('삭제완료');
   }
 
-  // update(id: number, updateData: UpdateMovieDto) {
-  //   const movie = this.getOne(id);
-  //   this.deleteOne(id);
-  //   this.movies.push({ ...movie, ...updateData });
+  async update(id: string, updateData: CreateMovieDto) {
+    return await this.movieModel.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
+  }
 }

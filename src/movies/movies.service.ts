@@ -1,39 +1,40 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Movie } from './entities/movie.entity';
+import { Injectable } from '@nestjs/common';
 import { CreateMovieDto } from './dto/create-movie.dto';
-import { UpdateMovieDto } from './dto/update-movie.dto';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { Movie, MovieDocument } from './schema/movie.schema';
+import { Connection, Model } from 'mongoose';
 
 @Injectable()
 export class MoviesService {
-      private movies: Movie[]=[];
+  constructor(
+    @InjectModel(Movie.name) private movieModel: Model<MovieDocument>,
+    @InjectConnection('movies') private connection: Connection,
+  ) {}
 
-      getAll(): Movie[] {
-          return this.movies; //Real database 사용시 query가 오는 부분
-      }
+  async create(movieData: CreateMovieDto): Promise<Movie> {
+    return new this.movieModel(movieData).save();
+  }
 
-      getOne(id:number):Movie {
-          const movie = this.movies.find(movie => movie.id)
-          if(!movie){
-              throw new NotFoundException(`Movie with id ${id} is not found`)
-          }
-          return movie;
-      }
+  getAll(): Promise<Movie[]> {
+    return this.movieModel.find().exec(); //Real database 사용시 query가 오는 부분
+  }
 
-      deleteOne(id:number){
-         this.getOne(id);
-         this.movies = this.movies.filter(movie => movie.id );
-      }
+  async getOne(id: string): Promise<Movie> {
+    // const movie = this.movieModel.find((movieModel) => movieModel.id);
+    // if (!movie) {
+    //   throw new NotFoundException(`Movie with id ${id} is not found`);
+    // }
+    console.log("get one service good");
+    return await this.movieModel.findOne({ id });
+  }
 
-      create(movieData:CreateMovieDto){
-          this.movies.push({
-              id:this.movies.length + 1,
-              ...movieData
-          })
-      }
+  deleteOne(id: string) {
+    this.getOne(id);
+    return this.movieModel.remove(id);
+  }
 
-      update(id:number, updateData:UpdateMovieDto){
-          const movie = this.getOne(id);
-          this.deleteOne(id);
-          this.movies.push({...movie, ...updateData});
-      }
+  // update(id: number, updateData: UpdateMovieDto) {
+  //   const movie = this.getOne(id);
+  //   this.deleteOne(id);
+  //   this.movies.push({ ...movie, ...updateData });
 }
